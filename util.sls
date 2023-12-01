@@ -1,7 +1,8 @@
 (library (util)
 
 (export is-substring-at? prefix? suffix? split-first split bytevector-slice string-find
-string-find-naive string-find-string string-join interperse)
+string-find-naive string-find-string string-join interperse string-sub read-lines-all
+string-empty?)
 (import (chezscheme))
 
 (define (is-substring-at? str what offset)
@@ -100,10 +101,20 @@ string-find-naive string-find-string string-join interperse)
   (assert (for-all string? strings))
   (apply string-append (interperse separator strings)))
 
+(define (string-sub str what that)
+  (let ((pieces (split str what)))
+    (apply string-join that pieces)))
+
 (define (bytevector-slice bv start end)
   (define len (- end start))
   (define dest (make-bytevector len))
   (bytevector-copy! bv start dest 0 len)
   dest)
 
+(define (read-lines-all path)
+  (let ((content (call-with-input-file path get-string-all)))
+    (split content "\n")))
+
+(define (string-empty? str)
+  (= (string-length str) 0))
 )
