@@ -1,9 +1,7 @@
 (import (util))
 
-(define data 
-  (filter
-    (lambda (s) (> (string-length s) 0))
-    (read-lines-all "d:/Niklas/repos/aoc2023/data/input1.txt")))
+(define data
+    (read-lines-all "d:/Niklas/repos/aoc2023/data/input1.txt"))
 
 (define (num-list str)
   (define (char->digit chr) (char- chr #\0))

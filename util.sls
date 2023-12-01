@@ -112,8 +112,13 @@ string-empty?)
   dest)
 
 (define (read-lines-all path)
-  (let ((content (call-with-input-file path get-string-all)))
-    (split content "\n")))
+  (call-with-input-file path
+    (lambda (port)
+      (let loop ((lines '()))
+        (let ((input (get-line port)))
+          (cond
+            ((eof-object? input) (reverse (if (string-empty? (car lines)) (cdr lines) lines)))
+            (else (loop (cons input lines)))))))))
 
 (define (string-empty? str)
   (= (string-length str) 0))
