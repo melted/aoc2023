@@ -2,7 +2,7 @@
 
 (export is-substring-at? prefix? suffix? split-first split bytevector-slice string-find
 string-find-naive string-find-string string-join interperse string-sub read-lines-all
-string-empty?)
+string-empty? string-non-empty? string-trim string-left-trim string-right-trim)
 (import (chezscheme))
 
 (define (is-substring-at? str what offset)
@@ -122,4 +122,27 @@ string-empty?)
 
 (define (string-empty? str)
   (= (string-length str) 0))
+
+(define (string-non-empty? str)
+  (> (string-length str) 0))
+
+(define (string-trim str)
+  (string-left-trim (string-right-trim str)))
+
+(define (string-left-trim str)
+  (if (string-non-empty? str)
+      (let loop ((i 0))
+        (if (char-whitespace? (string-ref str i))
+          (loop (+ i 1))
+          (substring str i (string-length str))))
+      str))
+
+
+(define (string-right-trim str)
+  (if (string-non-empty? str)
+      (let loop ((i (string-length str)))
+        (if (char-whitespace? (string-ref str (- i 1)))
+          (loop (- i 1))
+          (substring str 0 i)))
+      str))
 )
