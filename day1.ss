@@ -25,9 +25,10 @@
   (let loop ((nums '()) (i 0))
     (cond
       ((= i (string-length str)) (reverse nums))
-      ((assp (lambda (s) (is-substring-at? str s i)) alphanums) => (lambda (p) 
-                                                                    (loop (cons (cdr p) nums) (+ i 1))))
-      ((char-numeric? (string-ref str i)) (loop (cons (char- (string-ref str i) #\0) nums) (+ i 1)))
+      ((assp (lambda (s) (is-substring-at? str s i)) alphanums)
+         => (lambda (p) (loop (cons (cdr p) nums) (+ i 1))))
+      ((char-numeric? (string-ref str i)) 
+          (loop (cons (char- (string-ref str i) #\0) nums) (+ i 1)))
       (else (loop nums (+ i 1))))))
 
 (define (solve2 d)

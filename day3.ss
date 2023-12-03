@@ -34,21 +34,35 @@
   (let loop ((x 0) (in-num #f) (acc '()) (gears '()))
     (let ((ch (if (< x end) (string-ref str x) #\.)))
       (cond
-        ((and (= x end) in-num) (cons gears (cons (list (string->number (substring str in-num x)) in-num (- x 1) y) acc)))
+        ((and (= x end) in-num) 
+          (cons gears (cons (list (string->number (substring str in-num x)) in-num (- x 1) y) acc)))
         ((= x end) (cons gears acc))
         ((and (char-numeric? ch) (not in-num)) (loop (+ x 1) x acc gears))
         ((and (not (char-numeric? ch)) in-num)
-            (loop (+ x 1) #f (cons (list (string->number (substring str in-num x)) in-num (- x 1) y) acc) (if (char=? ch #\*) (cons (cons x y) gears) gears)))
+            (loop (+ x 1) 
+                  #f
+                  (cons (list (string->number (substring str in-num x)) 
+                              in-num 
+                              (- x 1) 
+                              y) 
+                        acc)
+                  (if (char=? ch #\*) (cons (cons x y) gears) gears)))
         ((char=? ch #\*) (loop (+ x 1) #f acc (cons (cons x y) gears)))
         (else (loop (+ x 1) in-num acc gears))))))
 
 (define (all-nums)
   (define ls (vector->list (current-data)))
-  (define nums-and-gears (map (lambda (s y) (find-nums-and-gears s y)) ls (enumerate ls)))
-  (cons (apply append (map car nums-and-gears)) (apply append (map cdr nums-and-gears))))
+  (define nums-and-gears (map (lambda (s y) (find-nums-and-gears s y)) 
+                              ls 
+                              (enumerate ls)))
+  (cons (apply append (map car nums-and-gears))
+        (apply append (map cdr nums-and-gears))))
 
 (define (solve1)
-  (apply + (map car (filter (lambda (ls) (apply neighbors? (cdr ls))) (cdr (all-nums))))))
+  (apply + 
+         (map car 
+              (filter (lambda (ls) (apply neighbors? (cdr ls)))
+                      (cdr (all-nums))))))
 
 
 (define example
@@ -73,7 +87,9 @@
 
 (define (get-pairs) 
   (define gears-and-nums (all-nums))
-  (define (close gear) (map car (filter (lambda (num) (in-range? (cdr num) gear)) (cdr gears-and-nums))))
+  (define (close gear) 
+    (map car 
+      (filter (lambda (num) (in-range? (cdr num) gear)) (cdr gears-and-nums))))
   (filter (lambda (n) (= (length n) 2)) (map close (car gears-and-nums))))
 
 (define (solve2)
