@@ -9,11 +9,10 @@
     (if (null? fields)
         rgb
         (let* ((field (split (string-trim (car fields)) " "))
-               (index 
-                  (cdr (assp (lambda (s) (string=? (cadr field) s))
-                    '(("red" . 0)
-                      ("green" . 1)
-                      ("blue" . 2))))))
+               (index (case (cadr field)
+                        (("red") 0)
+                        (("green") 1)
+                        (("blue") 2))))
             (vector-set! rgb index (string->number (car field)))
             (loop (cdr fields))))))
 
@@ -43,7 +42,7 @@
 (display (format "~a\n" (solve1 data)))
 
 (define (power game)
-  (define max-needed (fold-left (lambda (v1 v2) (vector-map max v1 v2)) (make-vector 3 0) (cdr game)))
+  (define max-needed (apply vector-map max (cdr game)))
   (fold-left * 1 (vector->list max-needed)))
 
 
