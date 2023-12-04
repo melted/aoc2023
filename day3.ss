@@ -2,7 +2,7 @@
 
 (define data
   (list->vector
-    (read-lines-all "d:/Niklas/repos/aoc2023/data/input3.txt")))
+    (read-lines-all "./data/input3.txt")))
 
 (define current-data (make-parameter data))
 (define (width) (string-length (vector-ref (current-data) 0)))

@@ -1,7 +1,7 @@
 (import (util))
 
 (define data
-    (read-lines-all "d:/Niklas/repos/aoc2023/data/input1.txt"))
+    (read-lines-all "./data/input1.txt"))
 
 (define (num-list str)
   (define (char->digit chr) (char- chr #\0))

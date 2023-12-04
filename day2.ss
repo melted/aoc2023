@@ -1,7 +1,7 @@
 (import (util))
 
 (define data
-    (read-lines-all "d:/Niklas/repos/aoc2023/data/input2.txt"))
+    (read-lines-all "./data/input2.txt"))
 
 (define (parse-round str)
   (define rgb (make-vector 3 0))
