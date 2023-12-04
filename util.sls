@@ -1,8 +1,9 @@
 (library (util)
 
-(export is-substring-at? prefix? suffix? split-first split bytevector-slice string-find
-string-find-naive string-find-string string-join interperse string-sub read-lines-all
-string-empty? string-non-empty? string-trim string-left-trim string-right-trim)
+(export is-substring-at? prefix? suffix? split-first split split-trim
+bytevector-slice string-find string-find-naive string-find-string
+string-join interperse string-sub read-lines-all string-empty?
+string-non-empty? string-trim string-left-trim string-right-trim)
 (import (chezscheme))
 
 (define (is-substring-at? str what offset)
@@ -33,6 +34,11 @@ string-empty? string-non-empty? string-trim string-left-trim string-right-trim)
       (if v
         (loop (cdr v) (cons (car v) acc))
         (reverse (cons rest acc))))))
+
+(define (split-trim str what)
+  (map string-trim
+       (filter string-non-empty? 
+               (split str what))))
 
 (define (string-find str what)
   (when (not (string? str))
@@ -81,7 +87,8 @@ string-empty? string-non-empty? string-trim string-left-trim string-right-trim)
     (let loop ((i 0))
       (cond
         ((= i len) #t)
-        ((char=? (string-ref str (- pos i)) (string-ref what (- len i 1))) (loop (+ i 1)))
+        ((char=? (string-ref str (- pos i))
+           (string-ref what (- len i 1))) (loop (+ i 1)))
         (else #f))))
   (let loop ((p (- len 1)))
       (cond
@@ -117,7 +124,10 @@ string-empty? string-non-empty? string-trim string-left-trim string-right-trim)
       (let loop ((lines '()))
         (let ((input (get-line port)))
           (cond
-            ((eof-object? input) (reverse (if (string-empty? (car lines)) (cdr lines) lines)))
+            ((eof-object? input)
+              (reverse (if (string-empty? (car lines)) 
+                           (cdr lines)
+                           lines)))
             (else (loop (cons input lines)))))))))
 
 (define (string-empty? str)
@@ -136,7 +146,6 @@ string-empty? string-non-empty? string-trim string-left-trim string-right-trim)
           (loop (+ i 1))
           (substring str i (string-length str))))
       str))
-
 
 (define (string-right-trim str)
   (if (string-non-empty? str)
