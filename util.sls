@@ -65,9 +65,9 @@ string-non-empty? string-trim string-left-trim string-right-trim)
   (define len (string-length what))
   (let loop ((i 0) (pos 0))
     (cond
-      ((= i len) pos)
+      ((= i len) (- pos len))
       ((= pos end) #f)
-      ((char=? (string-ref what i) (string-ref str (+ pos i))) (loop (+ i 1) pos))
+      ((char=? (string-ref what i) (string-ref str pos)) (loop (+ i 1) (+ pos 1)))
       (else (loop 0 (+ pos 1))))))
 
 ;; Using Boyer-Moore-Horspool
@@ -93,7 +93,7 @@ string-non-empty? string-trim string-left-trim string-right-trim)
   (let loop ((p (- len 1)))
       (cond
         ((>= p end) #f)
-        ((and (char=? last-ch (string-ref str p)) (match p)) (- p len 1))
+        ((and (char=? last-ch (string-ref str p)) (match p)) (- p len -1))
         (else (loop (+ p (lookup (string-ref str p))))))))
 
 (define (interperse v lst)
