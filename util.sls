@@ -3,7 +3,8 @@
 (export is-substring-at? prefix? suffix? split-first split split-trim
 bytevector-slice string-find string-find-naive string-find-string
 string-join interperse string-sub read-lines-all string-empty?
-string-non-empty? string-trim string-left-trim string-right-trim)
+string-non-empty? string-trim string-left-trim string-right-trim
+parse-fail satisfy try)
 (import (chezscheme))
 
 (define (is-substring-at? str what offset)
@@ -154,4 +155,49 @@ string-non-empty? string-trim string-left-trim string-right-trim)
           (loop (- i 1))
           (substring str 0 i)))
       str))
+
+(define-condition-type &parse-fail &condition make-parse-fail parse-fail?)
+
+(define-record-type no-parse)
+
+(define (parse-fail who msg)
+  (raise (condition
+    (make-parse-fail)
+    (make-who-condition who)
+    (make-message-condition msg))))
+
+(define (satisfy pred)
+  (lambda (port)
+    (let ((ch (get-char port)))
+      (cond
+        ((eof-object? ch) (parse-fail 'satisfy "end of file"))
+        ((pred ch) void)
+        (else (parse-fail 'satisfy "satify failed"))))))
+
+(define (try parser port)
+  (assert (port-has-port-position? port))
+  (assert (port-has-set-port-position!? port))
+  (let  ((old-pos (port-position port)))
+    (guard
+      (ex
+        ((parse-fail? ex) (make-no-parse)
+                          (set-port-position! port old-pos)))
+      (parser port))))
+
+(define (expect-char ch)
+  (satisfy (lambda (c) (char=? c ch))))
+
+(define (expect-string str)
+  (lambda (port)
+    (let ((input (get-string-n port (string-length str))))
+      (cond
+        ((eof-object? input) (parse-fail 'expect-string "end of file"))
+        ((string=? str input) void)
+        (else (parse-fail 'expect-string (format "Expected ~a, got ~a" str input)))))))
+
+(define (with-msg who msg parser)
+  (lambda (port)
+    (guard (ex
+      ((parse-fail? ex) (parse-fail who msg)))
+      (parser port))))
 )
