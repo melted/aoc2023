@@ -156,6 +156,11 @@ parse-fail satisfy try)
           (substring str 0 i)))
       str))
 
+(define (histogram values)
+  (define h (make-hashtable equal-hash equal?))
+  (for-each (lambda (v) (hashtable-update! h v (lambda (x) (+ x 1)) 0)) values)
+  h)
+
 (define-condition-type &parse-fail &condition make-parse-fail parse-fail?)
 
 (define-record-type no-parse)
