@@ -7,6 +7,7 @@ string-non-empty? string-trim string-left-trim string-right-trim
 parse-fail satisfy try)
 (import (chezscheme))
 
+
 (define (is-substring-at? str what offset)
   (define end (string-length what))
   (if (> (+ end offset) (string-length str))
