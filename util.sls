@@ -179,15 +179,16 @@ parse-fail satisfy try)
         ((pred ch) void)
         (else (parse-fail 'satisfy "satify failed"))))))
 
-(define (try parser port)
-  (assert (port-has-port-position? port))
-  (assert (port-has-set-port-position!? port))
-  (let  ((old-pos (port-position port)))
-    (guard
-      (ex
-        ((parse-fail? ex) (make-no-parse)
-                          (set-port-position! port old-pos)))
-      (parser port))))
+(define (try parser)
+  (lambda (port)
+    (assert (port-has-port-position? port))
+    (assert (port-has-set-port-position!? port))
+    (let  ((old-pos (port-position port)))
+      (guard
+        (ex
+          ((parse-fail? ex) (set-port-position! port old-pos)
+                            (make-no-parse)))
+        (parser port)))))
 
 (define (expect-char ch)
   (satisfy (lambda (c) (char=? c ch))))
@@ -199,6 +200,19 @@ parse-fail satisfy try)
         ((eof-object? input) (parse-fail 'expect-string "end of file"))
         ((string=? str input) void)
         (else (parse-fail 'expect-string (format "Expected ~a, got ~a" str input)))))))
+
+(define (parser-sequence . parsers)
+  (lambda (port)
+    (map (lambda (p) (p port)) parsers)))
+
+(define (parse-one-of . parsers)
+  (lambda (port)
+    (if (null? parsers) 
+        (parse-fail 'parse-one-of "No parser matched")
+        (let ((res (try (car parsers))))
+          (if (no-parse? res)
+              (apply parse-one-of (cdr parsers))
+              res)))))
 
 (define (with-msg who msg parser)
   (lambda (port)
