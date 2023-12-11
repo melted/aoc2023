@@ -183,7 +183,7 @@
   (define p (paint l))
   (define right (floodfill l (car p)))
   (define left (floodfill l (cadr p)))
-  (show l (cadr p) (car p))
+ ; (show l (cadr p) (car p))
   (list (hashtable-size right) (hashtable-size left) (hashtable-size loop)))
 
 (define (show bound l r)
