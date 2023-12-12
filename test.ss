@@ -16,3 +16,4 @@
 (assert (equal? (interperse 0 '(1 2 3)) '(1 0 2 0 3)))
 (assert (string=? (string-join "," "a" "b" "c") "a,b,c"))
 (assert (string=? (string-sub "onetwothree" "two" "2") "one2three"))
+(assert (equal? (groups '(1 1 0 0)) '((2 . 1) (2 . 0))))

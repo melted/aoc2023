@@ -4,7 +4,7 @@
 bytevector-slice string-find string-find-naive string-find-string
 string-join interperse string-sub read-lines-all string-empty?
 string-non-empty? string-trim string-left-trim string-right-trim
-parse-fail satisfy try)
+groups parse-fail satisfy try)
 (import (chezscheme))
 
 
@@ -161,6 +161,17 @@ parse-fail satisfy try)
   (define h (make-hashtable equal-hash equal?))
   (for-each (lambda (v) (hashtable-update! h v (lambda (x) (+ x 1)) 0)) values)
   h)
+
+(define (groups l)
+  (define (accum a x)
+    (if (null? a)
+        (list (cons 1 x))
+        (let ((tip (car a))
+              (rest (cdr a)))
+          (if (equal? (cdr tip) x)
+              (cons (cons (+ 1 (car tip)) (cdr tip)) rest)
+              (cons (cons 1 x) a)))))
+  (reverse (fold-left accum '() l)))
 
 (define-condition-type &parse-fail &condition make-parse-fail parse-fail?)
 
