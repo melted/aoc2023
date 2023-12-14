@@ -79,17 +79,17 @@
 
 (define (solve2 data)
   (define states (make-hashtable equal-hash equal?))
-  (define by-time (make-hashtable equal-hash equal?))
+  (define scores (make-hashtable equal-hash equal?))
   (let loop ((t 0) (d data))
     (let ((previous (hashtable-ref states d #f)))
       (if previous
           (let* ((cl (- t previous))
                 (final (+ (mod (- 1000000000 previous) cl) previous))
-                (final-score (hashtable-ref by-time final #f)))
+                (final-score (hashtable-ref scores final #f)))
             final-score)
           (begin
             (hashtable-set! states d t)
-            (hashtable-set! by-time t (score d))
+            (hashtable-set! scores t (score d))
             (loop (+ t 1) (cycle d)))))))
 
 (assert (= (solve2 example) 64))
