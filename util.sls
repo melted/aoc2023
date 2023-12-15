@@ -1,6 +1,6 @@
 (library (util)
 
-(export is-substring-at? prefix? suffix? split-first split split-trim
+(export is-substring-at? prefix? suffix? split-first split split-trim string-take-while
 bytevector-slice string-find string-find-naive string-find-string
 string-join interperse string-sub read-lines-all string-empty?
 string-non-empty? string-trim string-left-trim string-right-trim
@@ -17,6 +17,14 @@ groups parse-fail satisfy try)
         ((= n end) #t)
         ((char=? (string-ref what n) (string-ref str (+ n offset))) (loop (+ n 1)))
         (else #f)))))
+
+(define (string-take-while str pred)
+  (let loop ((i 0))
+    (cond
+      ((= i (string-length str)) (list str))
+      ((pred (string-ref str i)) (loop (+ i 1)))
+      (else (list (substring str 0 i) 
+                  (substring str i (string-length str)))))))
 
 (define (prefix? str what) (is-substring-at? str what 0))
 
