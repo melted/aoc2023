@@ -55,7 +55,6 @@
   (for-each handle-op ops)
   (apply + (map score (iota 256))))
 
-  
 (assert (= (solve2 example) 145))
 
 (printf "~a\n" (solve2 data))
