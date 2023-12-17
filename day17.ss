@@ -38,11 +38,6 @@
 (define (pos= p1 p2)
   (and (= (x p1) (x p2)) (= (y p1) (y p2))))
 
-(define (last3-same? path)
-  (or (< (length path) 3)
-      (and (eq? (car path) (cadr path))
-           (eq? (car path) (caddr path)))))
-
 (define (alts data state tmin tmax)
   (define pos (car state))
   (define dp (delta (cadr state)))
