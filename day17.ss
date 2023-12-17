@@ -14,7 +14,7 @@
 (define (y pos) (vector-ref pos 1))
 
 (define (in-bounds? data pos)
-  (and (<= 0 (x pos) (- (width data) 1)) (< 0 (y pos) (- (height data) 1))))
+  (and (<= 0 (x pos) (- (width data) 1)) (<= 0 (y pos) (- (height data) 1))))
 
 (define (at data pos)
   (if (in-bounds? data pos)
@@ -31,6 +31,9 @@
 (define (pos+ p1 p2)
   (vector (+ (x p1) (x p2))
           (+ (y p1) (y p2))))
+
+(define (pos* n p)
+  (vector (* n (x p)) (* n (y p))))
 
 (define (pos= p1 p2)
   (and (= (x p1) (x p2)) (= (y p1) (y p2))))
@@ -122,27 +125,28 @@
 
 (define (alts data state)
   (define pos (car state))
+  (define future-pos 
+    (do ((i 0 (+ i 1))
+         (p pos (pos+ p (delta (cadr state))))
+         (c 0 (+ c (at data p)))
+         (acc '() (cons (cons c p) acc)))
+         ((or (not (in-bounds? data p)) (= i 4)) (cdr (reverse acc)))))
   (define turns
     (case (cadr state)
       ((north south) '(east west))
       ((east west) '(north south))))
-  (define next-paths
-    (map (lambda (x) (cons x (list-head (cdr state) 
-                                        (min (length (cdr state)) 2)))) 
-         (if (last3-same? (cdr state))
-             turns
-             (cons (cadr state) turns))))
-  (filter (lambda (s) (in-bounds? data (car s)))
-          (map (lambda (p) (cons (pos+ pos (delta (car p))) p)) next-paths)))
+  (apply append (map (lambda (p) (map (lambda (t) (cons (car p) (list (cdr p) t))) turns)) future-pos)))
 
 (define (search data)
   (define travelled (make-hashtable equal-hash equal?))
   (define frontier (make-eq-hashtable))
   (define costs (create-min-heap))
-  (define (add-state state cost)
-    (unless (hashtable-contains? travelled (car state))
-      (hashtable-update! frontier cost (lambda (x) (cons state x)) '())
-      (insert costs cost)))
+  (define (add-state cstate base-cost)
+    (let ((state (cdr cstate))
+          (cost (+ (car cstate) base-cost)))
+     ; (unless (hashtable-contains? travelled state)
+        (hashtable-update! frontier cost (lambda (x) (cons state x)) '())
+        (insert costs cost)))
   (define (pop-state cost)
     (let ((states (hashtable-ref frontier cost #f)))
       (if states
@@ -153,19 +157,19 @@
             (car states))
           #f)))
   (define target (vector (- (width data) 1) (- (height data) 1)))
-  (add-state (list (vector 0 0) 'east) 0)
+  (add-state (cons 0 (list (vector 0 0) 'east)) 0)
   (let loop ()
     (let* ((min-cost (pop-min costs))
            (min-state (pop-state min-cost)))
       (printf "~a ~a ~a ~a\n" min-cost min-state (hashtable-size frontier) (hashtable-size travelled))
       (if (pos= (car min-state) target)
-          min-cost
+          (list min-cost travelled)
           (let ((prev (hashtable-ref travelled min-state #f)))
             (unless (and prev (<= prev min-cost))
                     (hashtable-set! travelled min-state min-cost)
-                    (for-each (lambda (s) (add-state s (+ min-cost (at data (car s)))))
-                              (alts data min-state)))
-            (loop))))))
+                    (for-each (lambda (s) (add-state s min-cost))
+                          (alts data min-state)))
+                (loop))))))
 
 (define example '#(
   "2413432311323"
