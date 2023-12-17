@@ -123,30 +123,28 @@
             out)))))
 
 
-(define (alts data state)
+(define (alts data state tmin tmax)
   (define pos (car state))
+  (define dp (delta (cadr state)))
   (define future-pos 
     (do ((i 0 (+ i 1))
-         (p pos (pos+ p (delta (cadr state))))
-         (c 0 (+ c (at data p)))
+         (p pos (pos+ p dp))
+         (c 0 (+ c (or (at data (pos+ p dp)) 0)))
          (acc '() (cons (cons c p) acc)))
-         ((or (not (in-bounds? data p)) (= i 4)) (cdr (reverse acc)))))
+         ((or (not (in-bounds? data p)) (= i (+ 1 tmax))) (list-tail (reverse acc) (min tmin (length acc))))))
   (define turns
     (case (cadr state)
       ((north south) '(east west))
       ((east west) '(north south))))
   (apply append (map (lambda (p) (map (lambda (t) (cons (car p) (list (cdr p) t))) turns)) future-pos)))
 
-(define (search data)
+(define (search data tmin tmax)
   (define travelled (make-hashtable equal-hash equal?))
   (define frontier (make-eq-hashtable))
-  (define costs (create-min-heap))
   (define (add-state cstate base-cost)
     (let ((state (cdr cstate))
           (cost (+ (car cstate) base-cost)))
-     ; (unless (hashtable-contains? travelled state)
-        (hashtable-update! frontier cost (lambda (x) (cons state x)) '())
-        (insert costs cost)))
+      (hashtable-update! frontier cost (lambda (x) (cons state x)) '())))
   (define (pop-state cost)
     (let ((states (hashtable-ref frontier cost #f)))
       (if states
@@ -158,18 +156,21 @@
           #f)))
   (define target (vector (- (width data) 1) (- (height data) 1)))
   (add-state (cons 0 (list (vector 0 0) 'east)) 0)
-  (let loop ()
-    (let* ((min-cost (pop-min costs))
-           (min-state (pop-state min-cost)))
-      (printf "~a ~a ~a ~a\n" min-cost min-state (hashtable-size frontier) (hashtable-size travelled))
-      (if (pos= (car min-state) target)
-          (list min-cost travelled)
-          (let ((prev (hashtable-ref travelled min-state #f)))
-            (unless (and prev (<= prev min-cost))
-                    (hashtable-set! travelled min-state min-cost)
-                    (for-each (lambda (s) (add-state s min-cost))
-                          (alts data min-state)))
-                (loop))))))
+  (when (= 1 tmin) (add-state (cons 0 (list (vector 0 0) 'south)) 0)) ; Hack for immediate turn on first square
+  (let loop ((t 0))
+    (let ((min-state (pop-state t)))
+      (if min-state
+          (begin
+            ;(printf "~a ~a ~a ~a\n" t min-state (hashtable-size frontier) (hashtable-size travelled))
+            (if (pos= (car min-state) target)
+              t
+              (let ((prev (hashtable-ref travelled min-state #f)))
+                (unless (and prev (<= prev t))
+                    (hashtable-set! travelled min-state t)
+                    (for-each (lambda (s) (add-state s t))
+                          (alts data min-state tmin tmax)))
+                (loop t))))
+          (loop (+ t 1))))))
 
 (define example '#(
   "2413432311323"
@@ -187,3 +188,15 @@
   "4322674655533"
 ))
 
+(define (solve data)
+  (search (parse-data data) 1 3))
+
+(define (solve2 data)
+  (search (parse-data data) 4 10))
+
+(assert (= (solve example) 102))
+
+(printf "~a\n" (solve data))
+(assert (= (solve2 example) 94))
+
+(printf "~a\n" (solve2 data))
