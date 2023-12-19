@@ -1,5 +1,7 @@
-(import (util))
+(import (util) (parser))
 
+
+;; util
 (assert (prefix? "hello" "hell"))
 (assert (suffix? "hello" "ello"))
 (assert (not (prefix? "hello" "abc")))
@@ -17,3 +19,6 @@
 (assert (string=? (string-join "," "a" "b" "c") "a,b,c"))
 (assert (string=? (string-sub "onetwothree" "two" "2") "one2three"))
 (assert (equal? (groups '(1 1 0 0)) '((2 . 1) (2 . 0))))
+
+;; parser
+(assert (char=? ((satisfy (lambda (c) (char=? #\a))) (open-string-input-port "abc")) #\a))

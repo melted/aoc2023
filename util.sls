@@ -4,7 +4,7 @@
 bytevector-slice string-find string-find-naive string-find-string
 string-join interperse string-sub read-lines-all string-empty?
 string-non-empty? string-trim string-left-trim string-right-trim
-groups parse-fail satisfy try)
+groups)
 (import (chezscheme))
 
 
@@ -181,62 +181,4 @@ groups parse-fail satisfy try)
               (cons (cons 1 x) a)))))
   (reverse (fold-left accum '() l)))
 
-(define-condition-type &parse-fail &condition make-parse-fail parse-fail?)
-
-(define-record-type no-parse)
-
-(define (parse-fail who msg)
-  (raise (condition
-    (make-parse-fail)
-    (make-who-condition who)
-    (make-message-condition msg))))
-
-(define (satisfy pred)
-  (lambda (port)
-    (let ((ch (get-char port)))
-      (cond
-        ((eof-object? ch) (parse-fail 'satisfy "end of file"))
-        ((pred ch) void)
-        (else (parse-fail 'satisfy "satify failed"))))))
-
-(define (try parser)
-  (lambda (port)
-    (assert (port-has-port-position? port))
-    (assert (port-has-set-port-position!? port))
-    (let  ((old-pos (port-position port)))
-      (guard
-        (ex
-          ((parse-fail? ex) (set-port-position! port old-pos)
-                            (make-no-parse)))
-        (parser port)))))
-
-(define (expect-char ch)
-  (satisfy (lambda (c) (char=? c ch))))
-
-(define (expect-string str)
-  (lambda (port)
-    (let ((input (get-string-n port (string-length str))))
-      (cond
-        ((eof-object? input) (parse-fail 'expect-string "end of file"))
-        ((string=? str input) void)
-        (else (parse-fail 'expect-string (format "Expected ~a, got ~a" str input)))))))
-
-(define (parser-sequence . parsers)
-  (lambda (port)
-    (map (lambda (p) (p port)) parsers)))
-
-(define (parse-one-of . parsers)
-  (lambda (port)
-    (if (null? parsers) 
-        (parse-fail 'parse-one-of "No parser matched")
-        (let ((res (try (car parsers))))
-          (if (no-parse? res)
-              (apply parse-one-of (cdr parsers))
-              res)))))
-
-(define (with-msg who msg parser)
-  (lambda (port)
-    (guard (ex
-      ((parse-fail? ex) (parse-fail who msg)))
-      (parser port))))
 )
