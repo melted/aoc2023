@@ -59,7 +59,7 @@
   (define-values (obstacles start) (parse-data data))
   (reach-steps obstacles start n))
 
-(define example '(
+(define example '#(
   "..........."
   ".....###.#."
   ".###.##..#."
