@@ -35,7 +35,9 @@
 
 (define (is-obstacle? obstacles) 
   (lambda (pos)
-    (hashtable-contains? obstacles pos)))
+    (hashtable-contains? obstacles
+                         (vector (mod (x pos) (width))
+                                 (mod (y pos) (height))))))
 
 (define (walk obstacles now)
   (let ((dests (map (lambda (p) (pos+ now p)) neighbors)))
@@ -70,3 +72,12 @@
   ".##..##.##."
   "..........."
 ))
+
+(define (solve2 data)
+  (define-values (obstacles start) (parse-data data))
+  (define a (solve data 65))
+  (define b (solve data 196))
+  (define c (solve data 327))
+  (define n 26501365)
+  (define i (/ (- n 65) 131))
+  (+ a (* i (- b a)) (* (/ (* i (- i 1)) 2) (+ a c (* -2 b)))))
