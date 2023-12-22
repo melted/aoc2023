@@ -4,7 +4,7 @@
 bytevector-slice string-find string-find-naive string-find-string
 string-join interperse string-sub read-lines-all string-empty?
 string-non-empty? string-trim string-left-trim string-right-trim
-groups)
+groups nub)
 (import (chezscheme))
 
 
@@ -180,5 +180,8 @@ groups)
               (cons (cons (+ 1 (car tip)) (cdr tip)) rest)
               (cons (cons 1 x) a)))))
   (reverse (fold-left accum '() l)))
+
+(define (nub l)
+  (map cdr (groups l)))
 
 )
