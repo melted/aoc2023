@@ -1,3 +1,6 @@
 {
-    "C_Cpp.default.compilerPath": "D:\\msys64\\mingw64\\bin\\clang.exe"
+    "C_Cpp.default.compilerPath": "D:\\msys64\\mingw64\\bin\\clang.exe",
+    "[scheme]": {
+        "editor.indentSize": 2
+    }
 }
